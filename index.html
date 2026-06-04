@@ -1,0 +1,553 @@
+<!DOCTYPE html>
+<html lang="en" data-theme="light">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <title>Watch Repair & Luxury Timepieces | Tic Time of Pasadena, CA</title>
+  <meta name="description" content="Tic Time of Pasadena offers expert watch repair, professional battery replacement, and a curated collection of luxury vintage and modern timepieces. Visit our Pasadena boutique today.">
+  <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/@picocss/pico@2/css/pico.min.css">
+  <link rel="stylesheet" href="css/custom.css">
+  <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
+  <script src="js/config.js"></script>
+</head>
+<body>
+  <!-- Navigation -->
+  <nav class="container-fluid">
+    <ul>
+      <li><a href="#home" class="brand">Tic Time of Pasadena</a></li>
+    </ul>
+    <ul>
+      <li><a href="#catalog" class="nav-link">The Collection</a></li>
+      <li><a href="#repairs" class="nav-link">Services & Repairs</a></li>
+      <li><a href="#about" class="nav-link">Our Heritage</a></li>
+    </ul>
+  </nav>
+
+  <main>
+    <!-- Hero Section -->
+    <section id="home" class="hero reveal fade-in-up active">
+      <div class="container">
+        <h1>Expert Watch Repair & Luxury Timepieces in Pasadena</h1>
+        <p class="lead">Pasadena's trusted boutique for professional horology, master watch repair, and a curated selection of world-class luxury watches.</p>
+        <div class="hero-actions grid">
+          <a href="#catalog" role="button">Shop Collection</a>
+          <a href="#repairs" role="button" class="secondary outline">Book Repair</a>
+        </div>
+      </div>
+    </section>
+
+    <!-- Catalog Section -->
+    <section id="catalog" class="section-pad reveal fade-in-right">
+      <div class="container">
+        <header style="text-align: center; margin-bottom: 4rem;">
+          <h2 style="font-family: var(--pico-font-family-heading); font-size: 2.5rem;">The Collection</h2>
+          <p style="color: var(--pico-muted-color);">Explore our curated inventory of luxury and vintage timepieces.</p>
+        </header>
+
+        <!-- Catalog Grid (Dynamically loaded by Supabase) -->
+        <div id="catalog-grid" class="grid-cols-4">
+          <div style="grid-column: 1 / -1; text-align: center; padding: 3rem;">
+            <p aria-busy="true">Loading the collection...</p>
+          </div>
+        </div>
+      </div>
+    </section>
+
+    <!-- Repairs Section -->
+    <section id="repairs" class="section-pad reveal fade-in-up" style="background: #fafafa;">
+      <div class="container" style="max-width: 800px;">
+        <header style="text-align: center; margin-bottom: 3rem;">
+          <h2 style="font-family: var(--pico-font-family-heading); font-size: 2.5rem;">Master Horology Services</h2>
+          <p style="color: var(--pico-muted-color);">Request a repair, polish, or authentication from our in-house master watchmakers.</p>
+        </header>
+
+        <div id="repair-form-container" style="background: var(--pico-card-background-color); border: 1px solid var(--pico-card-border-color); padding: 3rem; box-shadow: var(--pico-card-box-shadow);">
+          <form id="repair-form">
+            
+            <fieldset>
+              <legend style="color: var(--pico-primary); font-family: var(--pico-font-family-heading); margin-bottom: 1rem; font-size: 1.2rem;">Contact Information</legend>
+              <div class="grid">
+                <label for="name">
+                  Full Name
+                  <input type="text" id="name" name="Name" placeholder="e.g. John Doe" required>
+                </label>
+                <label for="email">
+                  Email Address
+                  <input type="email" id="email" name="Email" placeholder="e.g. john@example.com" required>
+                </label>
+              </div>
+              <label for="phone">
+                Phone Number
+                <input type="tel" id="phone" name="Phone" placeholder="(555) 555-5555">
+              </label>
+            </fieldset>
+
+            <hr style="margin: 2rem 0;">
+
+            <fieldset>
+              <legend style="color: var(--pico-primary); font-family: var(--pico-font-family-heading); margin-bottom: 1rem; font-size: 1.2rem;">Timepiece Details</legend>
+              <div class="grid">
+                <label for="brand">
+                  Brand / Manufacturer
+                  <input type="text" id="brand" name="Brand" placeholder="e.g. Rolex, Patek Philippe" required>
+                </label>
+                <label for="model">
+                  Model
+                  <input type="text" id="model" name="Model" placeholder="e.g. Submariner, Calatrava">
+                </label>
+              </div>
+              <label for="service">
+                Requested Service
+                <select id="service" name="Service" required>
+                  <option value="" disabled selected>Select a service...</option>
+                  <option value="battery">Battery Replacement</option>
+                  <option value="service">Full Mechanical Service</option>
+                  <option value="polish">Case / Bracelet Polishing</option>
+                  <option value="auth">Authentication</option>
+                  <option value="other">Other / Not Sure</option>
+                </select>
+              </label>
+              <label for="issue">
+                Describe the issue in detail
+                <textarea id="issue" name="Issue" placeholder="Please describe any symptoms, damage, or specific requests..." rows="4" required></textarea>
+              </label>
+              <label for="repair-image">
+                Upload a Photo of the Watch (Optional)
+                <input type="file" id="repair-image" accept="image/*">
+              </label>
+            </fieldset>
+
+            <button type="submit" id="submit-repair-btn" style="margin-top: 1rem; width: 100%;">Submit Request</button>
+            <p id="repair-status-msg" style="text-align: center; margin-top: 1rem; font-size: 0.9rem;"></p>
+            <p style="text-align: center; margin-top: 0.5rem; font-size: 0.8rem; color: var(--pico-muted-color);">For urgent inquiries, email <a href="mailto:tictimeofpasadena@yahoo.com">tictimeofpasadena@yahoo.com</a></p>
+          </form>
+        </div>
+      </div>
+    </section>
+
+    <!-- About & Location Section -->
+    <section id="about" class="section-pad reveal fade-in-right">
+      <div class="container">
+        <h2 style="font-family: var(--pico-font-family-heading); text-align: center; font-size: 2.5rem; margin-bottom: 4rem;">Our Heritage</h2>
+        
+        <div class="grid" style="gap: 4rem; align-items: flex-start;">
+          <div>
+            <h3 style="font-size: 1.5rem; color: var(--pico-color); margin-bottom: 1.5rem;">About Us</h3>
+            <p style="color: var(--pico-color); line-height: 1.8; margin-bottom: 1.5rem;">
+              At Tic Time, horological mastery meets unparalleled customer service. Nestled in the historic heart of Pasadena, our boutique has been a sanctuary for watch enthusiasts, collectors, and those seeking the perfect timepiece for life's milestones.
+            </p>
+            <p style="color: var(--pico-muted-color); line-height: 1.8; margin-bottom: 1.5rem;">
+              We believe a watch is more than an instrument that tells time; it is a legacy passed down through generations. Our curated collection spans from modern marvels of Swiss engineering to rare vintage classics that carry stories of eras past.
+            </p>
+            <p style="color: var(--pico-muted-color); line-height: 1.8;">
+              With an in-house master watchmaker, we don't just sell timepieces—we preserve them. Whether you are seeking a full mechanical restoration, a simple battery replacement, or your next heirloom, our dedicated team ensures every experience is as precise and enduring as the watches we curate.
+            </p>
+
+            <div style="margin-top: 3rem; padding-top: 2rem; border-top: 1px solid var(--pico-card-border-color);">
+              <h4 style="font-size: 1.2rem; color: var(--pico-color);">Visit Our Boutique</h4>
+              <p style="color: var(--pico-muted-color); font-size: 0.9rem;">
+                <strong>Address:</strong> Pasadena, CA<br>
+                <strong>Hours:</strong> Mon - Sat: 10:00 AM - 6:00 PM | Sunday: Closed
+              </p>
+            </div>
+          </div>
+          
+          <div>
+            <!-- Interactive Google Map Embed -->
+            <div style="background: #f0f0f0; width: 100%; height: 450px; border: 1px solid var(--pico-card-border-color); overflow: hidden; box-shadow: var(--pico-card-box-shadow);">
+              <iframe 
+                src="https://www.google.com/maps/embed?pb=!1m18!1m12!1m3!1d3303.4916892550186!2d-118.0867627236544!3d34.14643037311893!2m3!1f0!2f0!3f0!3m2!1i1024!2i768!4f13.1!3m3!1m2!1s0x80c2db6175bc23ff%3A0xf6368e888f67f7fc!2sTic%20Time%20Of%20Pasadena!5e0!3m2!1sen!2sus!4v1700000000000!5m2!1sen!2sus" 
+                width="100%" 
+                height="100%" 
+                style="border:0;" 
+                allowfullscreen="" 
+                loading="lazy" 
+                referrerpolicy="no-referrer-when-downgrade">
+              </iframe>
+            </div>
+            <div style="text-align: right; margin-top: 1rem;">
+                <a href="https://www.google.com/maps/place/Tic+Time+Of+Pasadena/@34.1459965,-118.0867681,17z/data=!3m2!4b1!5s0x80c2db619e3bb6b1:0x1017e191c7e42c1d!4m6!3m5!1s0x80c2db6175bc23ff:0xf6368e888f67f7fc!8m2!3d34.1459965!4d-118.0841878!16s%2Fg%2F1td1k83t?entry=ttu&g_ep=EgoyMDI2MDUyMC4wIKXMDSoASAFQAw%3D%3D" target="_blank" role="button" class="outline">Open in Google Maps</a>
+            </div>
+          </div>
+        </div>
+      </div>
+    </section>
+  </main>
+
+  <!-- Universal Checkout Modal -->
+  <dialog id="checkout-modal">
+    <article style="max-width: 600px; width: 100%;">
+      <header>
+        <a href="#close" aria-label="Close" class="close" onclick="closeCheckout()"></a>
+        <h3 id="checkout-modal-title">Complete Your Order</h3>
+      </header>
+      
+      <div id="checkout-form-container">
+        <form id="checkout-form">
+          <input type="hidden" id="checkout-watch-id">
+          <input type="hidden" id="checkout-watch-name">
+          <input type="hidden" id="checkout-unit-price">
+          <input type="hidden" id="checkout-shipping-price">
+          <input type="hidden" id="checkout-square-link">
+          
+          <div style="margin-bottom: 2rem; border-bottom: 1px solid var(--pico-card-border-color); padding-bottom: 1rem;">
+            <p><strong>Item:</strong> <span id="checkout-display-name"></span></p>
+            <p><strong>Price:</strong> <span id="checkout-display-unit-price"></span></p>
+            <p><strong>Shipping:</strong> <span id="checkout-display-shipping"></span></p>
+          </div>
+
+          <div class="grid">
+            <label>Full Name <input type="text" id="checkout-name" placeholder="John Doe" required></label>
+            <label>Email <input type="email" id="checkout-email" placeholder="john@example.com" required></label>
+          </div>
+          
+          <div class="grid">
+            <label>Quantity
+              <input type="number" id="checkout-quantity" value="1" min="1" required>
+            </label>
+            <label>Total Price
+              <input type="text" id="checkout-display-total" readonly>
+            </label>
+          </div>
+
+          <label>Shipping Address
+            <input type="text" id="checkout-address" placeholder="123 Watch Ave, Pasadena, CA 91101" required>
+          </label>
+
+          <label>Special Requests or Comments (Optional)
+            <textarea id="checkout-comments" placeholder="e.g. Please wrap as a gift..."></textarea>
+          </label>
+
+          <footer style="display: flex; justify-content: flex-end; gap: 1rem; margin-top: 2rem;">
+            <button type="button" class="secondary outline" onclick="closeCheckout()">Cancel</button>
+            <button type="submit" id="submit-checkout-btn">Secure Purchase</button>
+          </footer>
+        </form>
+      </div>
+
+      <div id="checkout-success-container" style="display: none; text-align: center;">
+        <div style="font-size: 3rem; margin-bottom: 1rem;">✅</div>
+        <h3>Order Registered!</h3>
+        <p>Your order for <strong><span id="success-watch-name"></span></strong> has been registered in our system.</p>
+        
+        <article style="background: #f8f9fa; border: 1px solid #eee; text-align: left; margin: 2rem 0;">
+          <p><strong>Final Step:</strong> Please click the button below to complete your secure payment via Square.</p>
+          <p style="font-size: 0.85rem; color: var(--pico-muted-color);">Note: We recommend checking <strong>Cloverly</strong> after payment to confirm the product has been successfully charged and purchased.</p>
+        </article>
+
+        <a href="#" id="final-square-link" role="button" style="width: 100%;" target="_blank" onclick="closeCheckout()">Proceed to Secure Payment</a>
+      </div>
+    </article>
+  </dialog>
+
+  <footer class="main-footer">
+    <div class="container grid">
+      <div>
+        <div class="footer-brand">Tic Time of Pasadena</div>
+        <p style="color: var(--pico-muted-color); margin-top: 1rem; font-size: 0.9rem;">Preserving the legacy of timekeeping through exceptional curation and service.</p>
+      </div>
+      <div>
+        <strong>Links</strong>
+        <ul style="list-style: none; padding: 0; margin-top: 1rem;">
+          <li><a href="#catalog" class="nav-link">Shop</a></li>
+          <li><a href="#repairs" class="nav-link">Repairs</a></li>
+          <li><a href="#about" class="nav-link">About</a></li>
+        </ul>
+      </div>
+      <div style="text-align: right;">
+        <small style="color: var(--pico-muted-color);">&copy; 2026 Tic Time of Pasadena.<br>All rights reserved.<br><br>Powered by Supabase & Square</small>
+      </div>
+    </div>
+  </footer>
+
+  <script>
+    const { createClient } = supabase;
+    const _supabase = createClient(window.SUPABASE_CONFIG.url, window.SUPABASE_CONFIG.key);
+
+    async function loadCatalog() {
+      const grid = document.getElementById('catalog-grid');
+      
+      try {
+        const { data, error } = await _supabase
+          .from('watches')
+          .select('*')
+          .eq('is_visible', true)
+          .order('created_at', { ascending: false });
+
+        if (error) throw error;
+
+        if (!data || data.length === 0) {
+          grid.innerHTML = `<p style="grid-column: 1 / -1; text-align: center; color: var(--pico-muted-color); padding: 3rem;">Our collection is currently being updated. Check back soon!</p>`;
+          return;
+        }
+
+        grid.innerHTML = data.map((watch, index) => {
+          const isOutOfStock = watch.stock_quantity <= 0;
+          return `
+          <article class="watch-card fade-in-up" style="animation-delay: ${index * 0.1}s">
+            <div class="img-wrapper" style="position: relative;">
+              <img src="${watch.image_url || 'https://via.placeholder.com/1000x666?text=Watch+Coming+Soon'}" alt="${watch.name} - Luxury Watch Pasadena" loading="lazy">
+              ${isOutOfStock ? '<div style="position: absolute; top: 0; left: 0; width: 100%; height: 100%; background: rgba(255,255,255,0.7); display: flex; align-items: center; justify-content: center; font-weight: bold; color: #c0392b;">SOLD OUT</div>' : ''}
+            </div>
+            <div style="padding: 1.25rem; display: flex; flex-direction: column; flex-grow: 1;">
+              <h3 style="font-size: 1.1rem; margin-bottom: 0.25rem;">${watch.name}</h3>
+              <p class="price" style="font-size: 1rem; margin-bottom: 0.25rem;">$${Number(watch.price).toLocaleString()}</p>
+              <p style="font-size: 0.85rem; color: var(--pico-secondary); margin-bottom: 0.75rem; font-weight: 500;">
+                ${watch.shipping_price > 0 ? '+ $' + Number(watch.shipping_price).toLocaleString() + ' Shipping' : 'Free Shipping'}
+              </p>
+              <p style="color: var(--pico-muted-color); font-size: 0.85rem; margin-bottom: 1.25rem; line-height: 1.4;">${watch.description}</p>
+              <footer style="margin-top: auto; padding-top: 1rem;">
+                <button style="width: 100%; padding: 0.5rem; font-size: 0.9rem;" 
+                  onclick="openCheckout('${watch.id}', '${watch.name.replace(/'/g, "\\'")}', ${watch.price}, ${watch.shipping_price || 0}, '${watch.square_link}', ${watch.stock_quantity || 0})"
+                  ${isOutOfStock ? 'disabled' : ''}>
+                  ${isOutOfStock ? 'Out of Stock' : 'Purchase'}
+                </button>
+              </footer>
+            </div>
+          </article>
+        `}).join('');
+      } catch (err) {
+        grid.innerHTML = `<p style="grid-column: 1 / -1; text-align: center; color: #c0392b;">Error loading collection.</p>`;
+      }
+    }
+
+    // Universal Checkout Logic
+    function openCheckout(id, name, price, shipping, link, stock) {
+      document.getElementById('checkout-watch-id').value = id;
+      document.getElementById('checkout-watch-name').value = name;
+      document.getElementById('checkout-unit-price').value = price;
+      document.getElementById('checkout-shipping-price').value = shipping;
+      document.getElementById('checkout-square-link').value = link;
+      
+      document.getElementById('checkout-display-name').textContent = name;
+      document.getElementById('checkout-display-unit-price').textContent = `$${price.toLocaleString()}`;
+      document.getElementById('checkout-display-shipping').textContent = shipping > 0 ? `$${shipping.toLocaleString()}` : 'Free';
+      
+      const qtyInput = document.getElementById('checkout-quantity');
+      qtyInput.max = stock;
+      qtyInput.value = 1;
+      
+      updateTotal();
+      
+      document.getElementById('checkout-form-container').style.display = 'block';
+      document.getElementById('checkout-success-container').style.display = 'none';
+      document.getElementById('checkout-modal-title').textContent = 'Complete Your Order';
+      document.getElementById('checkout-modal').setAttribute('open', true);
+    }
+
+    function updateTotal() {
+      const price = parseFloat(document.getElementById('checkout-unit-price').value);
+      const shipping = parseFloat(document.getElementById('checkout-shipping-price').value);
+      const qty = parseInt(document.getElementById('checkout-quantity').value) || 1;
+      const total = (price * qty) + shipping;
+      document.getElementById('checkout-display-total').value = `$${total.toLocaleString()}`;
+    }
+
+    document.getElementById('checkout-quantity').addEventListener('input', updateTotal);
+
+    function closeCheckout() {
+      document.getElementById('checkout-form').reset();
+      document.getElementById('checkout-modal').removeAttribute('open');
+    }
+
+    document.getElementById('checkout-form').addEventListener('submit', async (e) => {
+      e.preventDefault();
+      const btn = document.getElementById('submit-checkout-btn');
+      btn.setAttribute('aria-busy', 'true');
+      btn.disabled = true;
+
+      const qty = parseInt(document.getElementById('checkout-quantity').value);
+      const price = parseFloat(document.getElementById('checkout-unit-price').value);
+      const shipping = parseFloat(document.getElementById('checkout-shipping-price').value);
+      const total = (price * qty) + shipping;
+      const watchName = document.getElementById('checkout-watch-name').value;
+      const squareLink = document.getElementById('checkout-square-link').value;
+
+      const orderData = {
+        watch_id: document.getElementById('checkout-watch-id').value,
+        watch_name: watchName,
+        total_price: total,
+        quantity: qty,
+        customer_name: document.getElementById('checkout-name').value,
+        customer_email: document.getElementById('checkout-email').value,
+        shipping_address: document.getElementById('checkout-address').value,
+        comments: document.getElementById('checkout-comments').value,
+        status: 'Pending'
+      };
+
+      const { error } = await _supabase.from('orders').insert([orderData]);
+
+      btn.removeAttribute('aria-busy');
+      btn.disabled = false;
+
+      if (error) {
+        alert("Order registration failed: " + error.message);
+      } else {
+        document.getElementById('checkout-form-container').style.display = 'none';
+        document.getElementById('checkout-success-container').style.display = 'block';
+        document.getElementById('checkout-modal-title').textContent = 'Order Registered';
+        document.getElementById('success-watch-name').textContent = watchName;
+        
+        const finalLink = document.getElementById('final-square-link');
+        if (squareLink === 'PURCHASETEST') {
+          finalLink.textContent = "Complete Simulation (No Payment)";
+          finalLink.onclick = (e) => {
+             e.preventDefault();
+             alert("Simulation Complete!");
+             closeCheckout();
+          };
+        } else {
+          finalLink.href = squareLink;
+          finalLink.textContent = "Proceed to Secure Payment";
+          finalLink.onclick = () => { setTimeout(closeCheckout, 1000); };
+        }
+      }
+    });
+
+    // Repair Form Logic
+    async function compressImage(file, maxWidth = 1200) {
+        return new Promise((resolve, reject) => {
+            const reader = new FileReader();
+            reader.readAsDataURL(file);
+            reader.onload = (e) => {
+                const img = new Image();
+                img.src = e.target.result;
+                img.onload = () => {
+                    const canvas = document.createElement('canvas');
+                    let width = img.width;
+                    let height = img.height;
+
+                    if (width > maxWidth) {
+                        height = Math.round((height * maxWidth) / width);
+                        width = maxWidth;
+                    }
+
+                    canvas.width = width;
+                    canvas.height = height;
+                    const ctx = canvas.getContext('2d');
+                    ctx.drawImage(img, 0, 0, width, height);
+
+                    canvas.toBlob((blob) => {
+                        if (blob) resolve(blob);
+                        else reject(new Error("Compression failed"));
+                    }, 'image/jpeg', 0.8);
+                };
+                img.onerror = () => reject(new Error("Image load error"));
+            };
+            reader.onerror = () => reject(new Error("Reader error"));
+        });
+    }
+
+    document.getElementById('repair-form').addEventListener('submit', async (e) => {
+        e.preventDefault();
+        const btn = document.getElementById('submit-repair-btn');
+        const statusEl = document.getElementById('repair-status-msg');
+        btn.setAttribute('aria-busy', 'true');
+        btn.disabled = true;
+        statusEl.textContent = "Processing and sending request...";
+        statusEl.style.color = "var(--pico-primary)";
+
+        const customer_name = document.getElementById('name').value;
+        const customer_email = document.getElementById('email').value;
+        const customer_phone = document.getElementById('phone').value;
+        const watch_brand = document.getElementById('brand').value;
+        const watch_model = document.getElementById('model').value;
+        const service_type = document.getElementById('service').value;
+        const issue_description = document.getElementById('issue').value;
+        const imageFile = document.getElementById('repair-image').files[0];
+
+        let image_url = null;
+
+        if (imageFile) {
+            try {
+                statusEl.textContent = "Compressing photo...";
+                const compressedBlob = await compressImage(imageFile);
+                
+                statusEl.textContent = "Uploading photo...";
+                const sanitizedName = `repair-${Date.now()}.jpg`;
+                
+                const { data: uploadData, error: uploadError } = await _supabase.storage
+                    .from('repair_images')
+                    .upload(sanitizedName, compressedBlob, {
+                        contentType: 'image/jpeg',
+                        upsert: false
+                    });
+
+                if (uploadError) {
+                    console.error("Storage Upload Error:", uploadError);
+                    throw new Error(uploadError.message);
+                }
+
+                const { data: { publicUrl } } = _supabase.storage
+                    .from('repair_images')
+                    .getPublicUrl(sanitizedName);
+                
+                image_url = publicUrl;
+                statusEl.textContent = "Photo uploaded! Finalizing request...";
+            } catch (err) {
+                console.error("Image Processing Failed:", err);
+                const warnMsg = document.createElement('p');
+                warnMsg.style.color = "#d35400";
+                warnMsg.style.fontSize = "0.8rem";
+                warnMsg.textContent = "Note: Photo upload failed (likely due to size or connection), but your request details are being sent...";
+                statusEl.after(warnMsg);
+            }
+        }
+
+        const repairData = {
+            customer_name, customer_email, customer_phone,
+            watch_brand, watch_model, service_type, issue_description,
+            image_url
+        };
+
+        const { error } = await _supabase.from('repairs').insert([repairData]);
+
+        btn.removeAttribute('aria-busy');
+        btn.disabled = false;
+
+        if (error) {
+            statusEl.textContent = "Error submitting: " + error.message;
+            statusEl.style.color = "#c0392b";
+        } else {
+            statusEl.textContent = "🎉 Request received! Our master watchmaker will contact you shortly.";
+            statusEl.style.color = "#27ae60";
+            document.getElementById('repair-form').reset();
+        }
+    });
+
+    // Active link highlighting on scroll
+    const sections = document.querySelectorAll('section');
+    const navLinks = document.querySelectorAll('nav .nav-link');
+
+    window.addEventListener('scroll', () => {
+      let current = '';
+      sections.forEach(section => {
+        const sectionTop = section.offsetTop;
+        if (pageYOffset >= sectionTop - 150) {
+          current = section.getAttribute('id');
+        }
+      });
+
+      navLinks.forEach(link => {
+        link.classList.remove('active');
+        if (link.getAttribute('href').includes(current)) {
+          link.classList.add('active');
+        }
+      });
+    });
+
+    // Reveal on scroll logic
+    const revealObserver = new IntersectionObserver((entries) => {
+      entries.forEach(entry => {
+        if (entry.isIntersecting) {
+          entry.target.classList.add('active');
+        }
+      });
+    }, { threshold: 0.1 });
+
+    document.querySelectorAll('.reveal').forEach(el => revealObserver.observe(el));
+
+    loadCatalog();
+  </script>
+</body>
+</html>

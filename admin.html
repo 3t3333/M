@@ -1,0 +1,617 @@
+<!DOCTYPE html>
+<html lang="en" data-theme="light">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1">
+    <title>Admin Dashboard | Tic Time of Pasadena</title>
+    <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/@picocss/pico@2/css/pico.min.css">
+    <link rel="stylesheet" href="css/custom.css">
+    <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
+    <script src="js/config.js"></script>
+</head>
+<body>
+    <nav class="container-fluid">
+        <ul>
+            <li><a href="index.html" class="brand">Tic Time Admin</a></li>
+        </ul>
+        <ul id="nav-actions">
+            <!-- Logout button will be injected here -->
+        </ul>
+    </nav>
+
+    <main class="container">
+        <!-- Login Section -->
+        <section id="login-section">
+            <article>
+                <header><h2 style="text-align: center; font-size: 1.5rem;">Secure Login</h2></header>
+                <form id="login-form">
+                    <label for="email">Email</label>
+                    <input type="email" id="email" placeholder="admin@tictime.com" required>
+                    <label for="password">Password</label>
+                    <input type="password" id="password" required>
+                    <button type="submit" id="login-btn">Login to CMS</button>
+                </form>
+                <p id="login-error" style="color: #c0392b; font-size: 0.9rem; text-align: center; display: none;"></p>
+            </article>
+        </section>
+
+        <!-- Admin Content Section -->
+        <section id="admin-content">
+            <header class="admin-header">
+                <h1>Inventory</h1>
+                <button onclick="openModal()">+ Add New</button>
+            </header>
+
+            <div id="watches-list">
+                <!-- Watches will be loaded here -->
+                <p style="text-align: center; color: var(--pico-muted-color);">Loading inventory...</p>
+            </div>
+        </section>
+
+        <!-- Orders Section -->
+        <section id="orders-content" style="display: none; padding-top: 2rem;">
+            <header style="margin-bottom: 2rem;">
+                <h1>Order History</h1>
+                <p style="color: var(--pico-muted-color);">View simulated purchases from the public storefront.</p>
+            </header>
+            <div id="orders-list">
+                <p style="text-align: center; color: var(--pico-muted-color);">Loading orders...</p>
+            </div>
+        </section>
+
+        <!-- Repairs Section -->
+        <section id="repairs-content" style="display: none; padding-top: 2rem;">
+            <header style="margin-bottom: 2rem;">
+                <h1>Repair Requests</h1>
+                <p style="color: var(--pico-muted-color);">Manage incoming service and restoration inquiries.</p>
+            </header>
+            <div id="repairs-list">
+                <p style="text-align: center; color: var(--pico-muted-color);">Loading requests...</p>
+            </div>
+        </section>
+    </main>
+
+    <!-- Watch Modal -->
+    <dialog id="watch-modal">
+        <article style="max-width: 600px; width: 100%;">
+            <header>
+                <a href="#close" aria-label="Close" class="close" onclick="closeModal()"></a>
+                <h3 id="modal-title">Add New Watch</h3>
+            </header>
+            <form id="watch-form">
+                <input type="hidden" id="watch-id">
+                <div class="grid">
+                    <label for="watch-name">
+                        Watch Name
+                        <input type="text" id="watch-name" placeholder="e.g. Rolex Submariner" required>
+                    </label>
+                    <label for="watch-price">
+                        Price (USD)
+                        <input type="number" id="watch-price" placeholder="8500" required>
+                    </label>
+                    <label for="watch-shipping">
+                        Shipping Price ($)
+                        <input type="number" id="watch-shipping" placeholder="0" value="0" required>
+                    </label>
+                    <label for="watch-stock">
+                        Stock Quantity
+                        <input type="number" id="watch-stock" placeholder="1" value="1" required>
+                    </label>
+                </div>
+                
+                <label for="watch-desc">Description</label>
+                <textarea id="watch-desc" placeholder="Details about the watch..." rows="3" required></textarea>
+
+                <div class="grid">
+                    <label for="watch-link">
+                        Square Checkout Link (or type PURCHASETEST)
+                        <input type="text" id="watch-link" placeholder="https://square.link/u/..." required>
+                    </label>
+                    <label for="watch-status">
+                        Status
+                        <select id="watch-status">
+                            <option value="true">Published</option>
+                            <option value="false">Draft / Hidden</option>
+                        </select>
+                    </label>
+                </div>
+
+                <label for="watch-image">
+                    Watch Image (Min: 1000x666px)
+                    <input type="file" id="watch-image" accept="image/*">
+                </label>
+                <small id="image-upload-status" style="color: var(--pico-muted-color);"></small>
+
+                <footer style="display: flex; justify-content: flex-end; gap: 1rem; margin-top: 1rem;">
+                    <button type="button" class="secondary outline" onclick="closeModal()">Cancel</button>
+                    <button type="submit" id="save-btn">Save Watch</button>
+                </footer>
+            </form>
+        </article>
+    </dialog>
+
+    <!-- Password Reset Modal -->
+    <dialog id="password-modal">
+        <article style="max-width: 400px; width: 100%;">
+            <header>
+                <a href="#close" aria-label="Close" class="close" onclick="closePasswordModal()"></a>
+                <h3>Change Password</h3>
+            </header>
+            <form id="password-form">
+                <label for="new-password">
+                    New Password
+                    <input type="password" id="new-password" placeholder="Minimum 6 characters" required>
+                </label>
+                <p id="password-status" style="font-size: 0.9rem; margin-bottom: 1rem;"></p>
+                <footer style="display: flex; justify-content: flex-end; gap: 1rem; margin-top: 1rem;">
+                    <button type="button" class="secondary outline" onclick="closePasswordModal()">Cancel</button>
+                    <button type="submit" id="update-pwd-btn">Update Password</button>
+                </footer>
+            </form>
+        </article>
+    </dialog>
+
+    <script>
+        const { createClient } = supabase;
+        const _supabase = createClient(window.SUPABASE_CONFIG.url, window.SUPABASE_CONFIG.key);
+
+        const loginSection = document.getElementById('login-section');
+        const adminContent = document.getElementById('admin-content');
+        const ordersContent = document.getElementById('orders-content');
+        const loginForm = document.getElementById('login-form');
+        const watchForm = document.getElementById('watch-form');
+        const watchesList = document.getElementById('watches-list');
+        const ordersList = document.getElementById('orders-list');
+        const watchModal = document.getElementById('watch-modal');
+        const navActions = document.getElementById('nav-actions');
+
+        // Check authentication
+        async function checkAuth() {
+            const { data: { session } } = await _supabase.auth.getSession();
+            if (session) {
+                showDashboard();
+            } else {
+                showLogin();
+            }
+        }
+
+        function switchTab(tab) {
+            if (tab === 'inventory') {
+                adminContent.style.display = 'block';
+                ordersContent.style.display = 'none';
+                document.getElementById('repairs-content').style.display = 'none';
+                loadWatches();
+            } else if (tab === 'orders') {
+                adminContent.style.display = 'none';
+                ordersContent.style.display = 'block';
+                document.getElementById('repairs-content').style.display = 'none';
+                loadOrders();
+            } else if (tab === 'repairs') {
+                adminContent.style.display = 'none';
+                ordersContent.style.display = 'none';
+                document.getElementById('repairs-content').style.display = 'block';
+                loadRepairs();
+            }
+        }
+
+        function showDashboard() {
+            loginSection.style.display = 'none';
+            switchTab('inventory'); // Default tab
+            navActions.className = 'admin-nav-list';
+            navActions.innerHTML = `
+                <li><a href="#" onclick="switchTab('inventory')" role="button" class="outline secondary">Inventory</a></li>
+                <li><a href="#" onclick="switchTab('orders')" role="button" class="outline secondary">Orders</a></li>
+                <li><a href="#" onclick="switchTab('repairs')" role="button" class="outline secondary">Repairs</a></li>
+                <li><a href="#" onclick="openPasswordModal()" role="button" class="outline secondary">Security</a></li>
+                <li><a href="#" onclick="logout()" role="button" class="outline secondary">Logout</a></li>
+            `;
+        }
+
+        function showLogin() {
+            loginSection.style.display = 'block';
+            adminContent.style.display = 'none';
+            ordersContent.style.display = 'none';
+            navActions.innerHTML = '';
+        }
+
+        // Login
+        loginForm.addEventListener('submit', async (e) => {
+            e.preventDefault();
+            const email = document.getElementById('email').value;
+            const password = document.getElementById('password').value;
+            const errorEl = document.getElementById('login-error');
+            
+            const { error } = await _supabase.auth.signInWithPassword({ email, password });
+            if (error) {
+                errorEl.textContent = error.message;
+                errorEl.style.display = 'block';
+            } else {
+                showDashboard();
+            }
+        });
+
+        // Logout
+        async function logout() {
+            await _supabase.auth.signOut();
+            showLogin();
+        }
+
+        // Password Reset Modal Logic
+        function openPasswordModal() {
+            document.getElementById('new-password').value = '';
+            document.getElementById('password-status').textContent = '';
+            document.getElementById('password-modal').setAttribute('open', true);
+        }
+
+        function closePasswordModal() {
+            document.getElementById('password-modal').removeAttribute('open');
+        }
+
+        document.getElementById('password-form').addEventListener('submit', async (e) => {
+            e.preventDefault();
+            const newPassword = document.getElementById('new-password').value;
+            const btn = document.getElementById('update-pwd-btn');
+            const statusEl = document.getElementById('password-status');
+            
+            if (newPassword.length < 6) {
+                statusEl.textContent = "Password must be at least 6 characters.";
+                statusEl.style.color = "#c0392b";
+                return;
+            }
+
+            btn.setAttribute('aria-busy', 'true');
+            btn.disabled = true;
+
+            const { error } = await _supabase.auth.updateUser({
+                password: newPassword
+            });
+
+            btn.removeAttribute('aria-busy');
+            btn.disabled = false;
+
+            if (error) {
+                statusEl.textContent = "Failed: " + error.message;
+                statusEl.style.color = "#c0392b";
+            } else {
+                statusEl.textContent = "Password updated successfully!";
+                statusEl.style.color = "var(--pico-primary)";
+                setTimeout(closePasswordModal, 1500);
+            }
+        });
+
+        // Load Watches
+        async function loadWatches() {
+            const { data, error } = await _supabase
+                .from('watches')
+                .select('*')
+                .order('created_at', { ascending: false });
+
+            if (error) {
+                watchesList.innerHTML = `<p style="color: #c0392b;">Error loading inventory: ${error.message}</p>`;
+                return;
+            }
+
+            if (data.length === 0) {
+                watchesList.innerHTML = '<p style="text-align: center; color: var(--pico-muted-color);">No watches in inventory. Add your first one!</p>';
+                return;
+            }
+
+            watchesList.innerHTML = data.map(watch => `
+                <div class="watch-item">
+                    <div style="display: flex; align-items: center;">
+                        <img src="${watch.image_url || 'https://via.placeholder.com/80'}" alt="${watch.name}">
+                        <div>
+                            <h4 style="margin: 0; font-size: 1rem;">${watch.name}</h4>
+                            <span class="status-badge ${watch.is_visible ? 'status-published' : 'status-draft'}">
+                                ${watch.is_visible ? 'Published' : 'Draft'}
+                            </span>
+                            <span style="font-size: 0.8rem; margin-left: 10px;">
+                                $${Number(watch.price).toLocaleString()} (+ $${Number(watch.shipping_price || 0).toLocaleString()} S&H) | 
+                                Stock: ${watch.stock_quantity || 0}
+                            </span>
+                        </div>
+                    </div>
+                    <div>
+                        <button class="outline secondary" style="padding: 4px 12px; margin-right: 8px;" onclick="editWatch('${watch.id}')">Edit</button>
+                        <button class="outline" style="padding: 4px 12px; color: var(--pico-contrast); border-color: var(--pico-contrast);" onclick="deleteWatch('${watch.id}')">Delete</button>
+                    </div>
+                </div>
+            `).join('');
+        }
+
+        // Load Orders
+        async function loadOrders() {
+            const { data, error } = await _supabase
+                .from('orders')
+                .select('*')
+                .order('created_at', { ascending: false });
+
+            if (error) {
+                ordersList.innerHTML = `<p style="color: #c0392b;">Error loading orders: ${error.message}</p>`;
+                return;
+            }
+
+            if (data.length === 0) {
+                ordersList.innerHTML = '<p style="text-align: center; color: var(--pico-muted-color);">No simulated orders yet.</p>';
+                return;
+            }
+
+            ordersList.innerHTML = data.map(order => {
+                const date = new Date(order.created_at).toLocaleString();
+                return `
+                <div class="order-item">
+                    <div class="order-header">
+                        <strong>Order #${order.id.slice(0, 8)}...</strong>
+                        <div style="display: flex; align-items: center; gap: 1rem;">
+                            <span class="status-badge" style="background: ${order.status === 'fulfilled' ? '#e8f8f5' : order.status === 'Processing' ? '#eef2ff' : '#f5f5f5'}; color: ${order.status === 'fulfilled' ? '#16a085' : order.status === 'Processing' ? '#4b5694' : '#666'};">
+                                ${order.status || 'Pending'}
+                            </span>
+                            <span class="order-date">${date}</span>
+                        </div>
+                    </div>
+                    <div class="order-body">
+                        <div class="order-customer">
+                            <p><strong>Customer:</strong> ${order.customer_name} (${order.customer_email})</p>
+                            <p><strong>Address:</strong> ${order.shipping_address}</p>
+                            ${order.comments ? `<p><strong>Comments:</strong> ${order.comments}</p>` : ''}
+                        </div>
+                        <div class="order-details">
+                            <p><strong>Item:</strong> ${order.watch_name} (Qty: ${order.quantity || 1})</p>
+                            <p class="order-total">Total: $${Number(order.total_price).toLocaleString()}</p>
+                            <div style="margin-top: 1rem; display: flex; gap: 0.5rem; justify-content: flex-end;">
+                                ${order.status === 'Pending' 
+                                    ? `<button class="outline secondary" style="padding: 4px 12px; font-size: 0.8rem;" onclick="updateOrderStatus('${order.id}', 'Processing')">Mark Processing</button>`
+                                    : ''
+                                }
+                                ${order.status !== 'fulfilled' 
+                                    ? `<button class="outline secondary" style="padding: 4px 12px; font-size: 0.8rem;" onclick="updateOrderStatus('${order.id}', 'fulfilled')">Mark Fulfilled</button>`
+                                    : `<button class="outline" style="padding: 4px 12px; font-size: 0.8rem; color: #c0392b; border-color: #c0392b;" onclick="deleteOrder('${order.id}')">Delete Order</button>`
+                                }
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            `}).join('');
+        }
+
+        async function updateOrderStatus(id, status) {
+            if (!confirm(`Mark this order as ${status}?`)) return;
+            const { error } = await _supabase.from('orders').update({ status }).eq('id', id);
+            if (error) alert("Update failed: " + error.message);
+            else loadOrders();
+        }
+
+        async function deleteOrder(id) {
+            if (!confirm("Are you sure you want to delete this order?")) return;
+            const { error } = await _supabase.from('orders').delete().eq('id', id);
+            if (error) alert("Delete failed: " + error.message);
+            else loadOrders();
+        }
+
+        // Load Repairs
+        async function loadRepairs() {
+            const list = document.getElementById('repairs-list');
+            const { data, error } = await _supabase
+                .from('repairs')
+                .select('*')
+                .order('created_at', { ascending: false });
+
+            if (error) {
+                list.innerHTML = `<p style="color: #c0392b;">Error loading repairs: ${error.message}</p>`;
+                return;
+            }
+
+            if (data.length === 0) {
+                list.innerHTML = '<p style="text-align: center; color: var(--pico-muted-color);">No repair requests yet.</p>';
+                return;
+            }
+
+            list.innerHTML = data.map(repair => {
+                const date = new Date(repair.created_at).toLocaleString();
+                return `
+                <div class="order-item">
+                    <div class="order-header">
+                        <strong>Request for ${repair.watch_brand}</strong>
+                        <span class="order-date">${date}</span>
+                    </div>
+                    <div class="order-body">
+                        <div class="order-customer" style="flex: 2;">
+                            <p><strong>Customer:</strong> ${repair.customer_name}</p>
+                            <p><strong>Contact:</strong> ${repair.customer_email} / ${repair.customer_phone || 'N/A'}</p>
+                            <p><strong>Issue:</strong> ${repair.issue_description}</p>
+                            <div style="margin-top: 1rem;">
+                                <strong>Status:</strong> 
+                                <select onchange="updateRepairStatus('${repair.id}', this.value)" style="display: inline-block; width: auto; padding: 2px 8px; margin-left: 10px; font-size: 0.8rem;">
+                                    <option value="pending" ${repair.status === 'pending' ? 'selected' : ''}>Pending</option>
+                                    <option value="in-progress" ${repair.status === 'in-progress' ? 'selected' : ''}>In Progress</option>
+                                    <option value="completed" ${repair.status === 'completed' ? 'selected' : ''}>Completed</option>
+                                    <option value="cancelled" ${repair.status === 'cancelled' ? 'selected' : ''}>Cancelled</option>
+                                </select>
+                            </div>
+                        </div>
+                        <div class="order-details" style="flex: 1; text-align: right;">
+                            <p><strong>Model:</strong> ${repair.watch_model || 'Unknown'}</p>
+                            <p><strong>Service:</strong> ${repair.service_type}</p>
+                            ${repair.image_url ? `<a href="${repair.image_url}" target="_blank"><img src="${repair.image_url}" style="width: 100px; height: 100px; object-fit: cover; margin-top: 10px; border: 1px solid #ddd;"></a>` : '<p style="color: #999; font-size: 0.8rem;">No photo uploaded</p>'}
+                            <div style="margin-top: 1rem;">
+                                <button class="outline" style="padding: 2px 8px; font-size: 0.7rem; color: #c0392b; border-color: #c0392b;" onclick="deleteRepair('${repair.id}')">Delete Record</button>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            `}).join('');
+        }
+
+        async function updateRepairStatus(id, status) {
+            const { error } = await _supabase.from('repairs').update({ status }).eq('id', id);
+            if (error) alert("Update failed: " + error.message);
+        }
+
+        async function deleteRepair(id) {
+            if (!confirm("Are you sure you want to delete this request record?")) return;
+            const { error } = await _supabase.from('repairs').delete().eq('id', id);
+            if (error) alert(error.message); else loadRepairs();
+        }
+
+        // Modal Logic
+        function openModal(watch = null) {
+            watchForm.reset();
+            document.getElementById('watch-id').value = '';
+            document.getElementById('modal-title').textContent = 'Add New Watch';
+            
+            if (watch) {
+                document.getElementById('watch-id').value = watch.id;
+                document.getElementById('watch-name').value = watch.name;
+                document.getElementById('watch-price').value = watch.price;
+                document.getElementById('watch-shipping').value = watch.shipping_price || 0;
+                document.getElementById('watch-stock').value = watch.stock_quantity || 1;
+                document.getElementById('watch-desc').value = watch.description;
+                document.getElementById('watch-link').value = watch.square_link;
+                document.getElementById('watch-status').value = watch.is_visible.toString();
+                document.getElementById('modal-title').textContent = 'Edit Watch';
+            }
+            
+            watchModal.setAttribute('open', true);
+        }
+
+        function closeModal() {
+            watchModal.removeAttribute('open');
+        }
+
+        // Save Watch
+        watchForm.addEventListener('submit', async (e) => {
+            e.preventDefault();
+            const btn = document.getElementById('save-btn');
+            const statusEl = document.getElementById('image-upload-status');
+            btn.setAttribute('aria-busy', 'true');
+            btn.disabled = true;
+
+            const id = document.getElementById('watch-id').value;
+            const name = document.getElementById('watch-name').value;
+            const price = document.getElementById('watch-price').value;
+            const shipping_price = document.getElementById('watch-shipping').value || 0;
+            const stock_quantity = document.getElementById('watch-stock').value || 1;
+            const description = document.getElementById('watch-desc').value;
+            const square_link = document.getElementById('watch-link').value;
+            const is_visible = document.getElementById('watch-status').value === 'true';
+            const imageFile = document.getElementById('watch-image').files[0];
+
+            let image_url = null;
+
+            // Handle image upload with Processing/Resizing
+            if (imageFile) {
+                statusEl.textContent = "Processing image...";
+                try {
+                    const processedImage = await processImage(imageFile);
+                    const fileName = `${Date.now()}-${imageFile.name.split('.')[0]}.webp`;
+                    
+                    const { data: uploadData, error: uploadError } = await _supabase.storage
+                        .from('watch_images')
+                        .upload(fileName, processedImage, { contentType: 'image/webp' });
+
+                    if (uploadError) throw new Error(uploadError.message);
+
+                    const { data: { publicUrl } } = _supabase.storage
+                        .from('watch_images')
+                        .getPublicUrl(fileName);
+                    
+                    image_url = publicUrl;
+                } catch (err) {
+                    alert(err.message);
+                    btn.removeAttribute('aria-busy');
+                    btn.disabled = false;
+                    statusEl.textContent = "";
+                    return;
+                }
+            }
+
+            const watchData = { name, price, shipping_price, stock_quantity, description, square_link, is_visible };
+            if (image_url) watchData.image_url = image_url;
+
+            let error;
+            if (id) {
+                const { error: updateError } = await _supabase.from('watches').update(watchData).eq('id', id);
+                error = updateError;
+            } else {
+                const { error: insertError } = await _supabase.from('watches').insert([watchData]);
+                error = insertError;
+            }
+
+            if (error) alert("Save failed: " + error.message);
+            else { closeModal(); loadWatches(); }
+
+            btn.removeAttribute('aria-busy');
+            btn.disabled = false;
+            statusEl.textContent = "";
+        });
+
+        async function editWatch(id) {
+            const { data, error } = await _supabase.from('watches').select('*').eq('id', id).single();
+            if (data) openModal(data);
+        }
+
+        async function deleteWatch(id) {
+            if (!confirm("Are you sure?")) return;
+            const { error } = await _supabase.from('watches').delete().eq('id', id);
+            if (error) alert(error.message); else loadWatches();
+        }
+
+        // Helper: Resize and Validate with Smart Cropping
+        function processImage(file) {
+            return new Promise((resolve, reject) => {
+                const reader = new FileReader();
+                reader.readAsDataURL(file);
+                reader.onload = (e) => {
+                    const img = new Image();
+                    img.src = e.target.result;
+                    img.onload = () => {
+                        // The minimum size we'll accept before it looks terrible
+                        const minW = 400; 
+                        const minH = 266;
+                        if (img.width < minW || img.height < minH) {
+                            return reject(new Error(`Image too small! Please upload an image at least ${minW}x${minH} pixels.`));
+                        }
+                        
+                        // The final size we want to output to the database
+                        const targetW = 1000;
+                        const targetH = 666;
+                        
+                        const canvas = document.createElement('canvas');
+                        canvas.width = targetW; 
+                        canvas.height = targetH;
+                        const ctx = canvas.getContext('2d');
+                        
+                        // Calculate Smart Center Crop
+                        const imgRatio = img.width / img.height;
+                        const targetRatio = targetW / targetH;
+                        
+                        let sx, sy, sWidth, sHeight;
+                        
+                        if (imgRatio > targetRatio) {
+                            // Image is wider than our target ratio (crop sides)
+                            sHeight = img.height;
+                            sWidth = img.height * targetRatio;
+                            sx = (img.width - sWidth) / 2;
+                            sy = 0;
+                        } else {
+                            // Image is taller than our target ratio (crop top/bottom)
+                            sWidth = img.width;
+                            sHeight = img.width / targetRatio;
+                            sx = 0;
+                            sy = (img.height - sHeight) / 2;
+                        }
+
+                        // Draw the cropped image scaled up/down to our target dimensions
+                        ctx.drawImage(img, sx, sy, sWidth, sHeight, 0, 0, targetW, targetH);
+                        
+                        // Output high-quality WebP
+                        canvas.toBlob(b => b ? resolve(b) : reject(new Error("Failed to process image")), 'image/webp', 0.9);
+                    };
+                };
+            });
+        }
+
+        checkAuth();
+    </script>
+</body>
+</html>
